@@ -7,7 +7,6 @@ The program runs fully locally and securely without relying on external reposito
 
 It essentially solved my problem, if it solves others' problems too, I would be happy.
 
-# PdfBreeze
 
 
 ## Screenshots
