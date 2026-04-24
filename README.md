@@ -5,7 +5,13 @@ PdfBreeze is built with PyQt6 that provides a unified graphical interface for va
 
 The program runs fully locally and securely without relying on external repository cloning. It utilizes direct integration scripts dependent entirely on standard Python PDF packages (`pypdf`, `PyMuPDF`, and `Pillow`).
 
+<<<<<<< HEAD
 It esentially solved my problem, if it solves others' problems, I would be happy.
+=======
+It esentially solved my problem, if it solves others' problems too, I would be happy.
+
+# PdfBreeze
+>>>>>>> be9f181 (Initial)
 
 
 ## Screenshots
