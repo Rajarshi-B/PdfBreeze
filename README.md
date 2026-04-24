@@ -12,16 +12,12 @@ It essentially solved my problem, if it solves others' problems too, I would be 
 
 ## Screenshots
 
-*Place screenshot of Main App Front here*
 ![Main App Front](images/main_app_screenshot.png)
 
-*Place screenshot of Reordering Pages here*
 ![Reordering Pages](images/reorder_screenshot.png)
 
-*Place screenshot of Deleting Pages here*
 ![Deleting Pages](images/delete_screenshot.png)
 
-*Place screenshot of Watermark Editor here*
 ![Watermark Editor](images/watermark_screenshot.png)
 
 ## Project Structure
