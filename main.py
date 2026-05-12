@@ -9,11 +9,28 @@ import os
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHBoxLayout, QPushButton, QStatusBar, QMessageBox,
-    QGroupBox, QFileDialog, QInputDialog, QScrollArea, QFrame
+    QGroupBox, QFileDialog, QInputDialog, QScrollArea, QFrame,
+    QProgressDialog
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 import logic_bridge
 from ui_elements import FileOrderWidget, get_dark_stylesheet
+
+class WorkerThread(QThread):
+    finished = pyqtSignal(bool, str, str) # success, error_type, error_msg
+
+    def __init__(self, logic_call, *args):
+        super().__init__()
+        self.logic_call = logic_call
+        self.args = args
+
+    def run(self):
+        try:
+            self.logic_call(*self.args)
+            self.finished.emit(True, "", "")
+        except Exception as e:
+            self.finished.emit(False, type(e).__name__, str(e))
+
 
 class PdfBreezeMainWindow(QMainWindow):
     """
@@ -456,21 +473,31 @@ class PdfBreezeMainWindow(QMainWindow):
         return True
 
     def _execute_with_safety(self, logic_call, *args, success_msg="Saved successfully"):
-        """ 6. File Accessibility Error Locking """
-        try:
-            logic_call(*args)
-            if success_msg:
-                QMessageBox.information(self, "Success", success_msg)
-            return True
-        except FileNotFoundError as e:
-            QMessageBox.critical(self, "File Accessibility Trap", f"File disappeared post-dropping! {str(e)}")
-            return False
-        except Exception as e:
-            if "PdfReadError" in str(type(e)):
-                QMessageBox.critical(self, "Accessibility Limit", f"Failed reading PDF structure gracefully: {str(e)}")
+        """ 6. File Accessibility Error Locking & Async Execution """
+        self.progress_dialog = QProgressDialog("Processing PDF...", None, 0, 0, self)
+        self.progress_dialog.setWindowTitle("Please Wait")
+        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.show()
+
+        self.worker = WorkerThread(logic_call, *args)
+        
+        def on_finished(success, error_type, error_msg):
+            self.progress_dialog.close()
+            if success:
+                if success_msg:
+                    QMessageBox.information(self, "Success", success_msg)
             else:
-                QMessageBox.critical(self, "Logic Execution Error", f"Failed to execute pipeline: {str(e)}")
-            return False
+                if error_type == "FileNotFoundError":
+                    QMessageBox.critical(self, "File Accessibility Trap", f"File disappeared post-dropping! {error_msg}")
+                elif "PdfReadError" in error_type:
+                    QMessageBox.critical(self, "Accessibility Limit", f"Failed reading PDF structure gracefully: {error_msg}")
+                else:
+                    QMessageBox.critical(self, "Logic Execution Error", f"Failed to execute pipeline: {error_msg}")
+
+        self.worker.finished.connect(on_finished)
+        self.worker.start()
+        return True
 
     # ===============================================
     # Orchestrator Actions (Logic Mappings)
