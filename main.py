@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHBoxLayout, QPushButton, QStatusBar, QMessageBox,
     QGroupBox, QFileDialog, QInputDialog, QScrollArea, QFrame,
-    QProgressDialog
+    QProgressDialog, QLineEdit
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 import logic_bridge

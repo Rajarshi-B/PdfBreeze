@@ -333,13 +333,14 @@ def digital_sign_pdf(file_path, output_path, pfx_path, password):
     from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
     
     with open(file_path, 'rb') as f:
-        reader = PdfFileReader(f)
-        writer = IncrementalPdfFileWriter(reader)
-        signer = signers.SimpleSigner.load_pkcs12(pfx_path, password.encode())
+        writer = IncrementalPdfFileWriter(f)
+        signer = signers.SimpleSigner.load_pkcs12(pfx_path, passphrase=password.encode())
+        if signer is None:
+            raise ValueError("Failed to load PKCS12 file. Ensure the password is correct and the file is a valid .pfx or .p12 bundle containing a private key.")
         sign_meta = signers.PdfSignatureMetadata(field_name='Signature1')
         
         with open(output_path, 'wb') as out_f:
-            signers.sign_pdf(writer, sign_meta, signer=signer, out=out_f)
+            signers.sign_pdf(writer, sign_meta, signer=signer, output=out_f)
 
 def add_watermark(file_path, output_path, params):
     """ Mapped PyMuPDF translation for visual watermarking UI overlay coordinates """
