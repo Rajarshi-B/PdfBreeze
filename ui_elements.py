@@ -128,7 +128,7 @@ def get_dark_stylesheet():
     QPushButton:pressed { background-color: #3a3a3a; }
     """
 
-from PyQt6.QtWidgets import QDialog, QSpinBox, QFormLayout, QComboBox, QLineEdit
+from PyQt6.QtWidgets import QDialog, QSpinBox, QFormLayout, QComboBox, QLineEdit, QProgressDialog, QApplication
 
 class PDFPageViewerDialog(QDialog):
     """
@@ -190,7 +190,16 @@ class PDFPageViewerDialog(QDialog):
             import pymupdf
             from PyQt6.QtGui import QImage, QPixmap, QIcon
             doc = pymupdf.open(self.pdf_path)
+            
+            progress = QProgressDialog("Loading thumbnails...", "Cancel", 0, len(doc), self)
+            progress.setWindowTitle("Please Wait")
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
+            progress.show()
+
             for i in range(len(doc)):
+                if progress.wasCanceled():
+                    break
+                
                 page = doc.load_page(i)
                 pix = page.get_pixmap(matrix=pymupdf.Matrix(0.2, 0.2))
                 img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format.Format_RGB888)
@@ -234,6 +243,11 @@ class PDFPageViewerDialog(QDialog):
                     
                     item.setSizeHint(widget.sizeHint())
                     self.list_widget.setItemWidget(item, widget)
+
+                progress.setValue(i + 1)
+                QApplication.processEvents()
+                
+            progress.setValue(len(doc))
 
         except Exception as e:
             print("Thumbnail load error:", e)
@@ -351,6 +365,11 @@ class PageNumberDialog(QDialog):
         btn_ok.clicked.connect(self.accept)
         layout.addWidget(btn_ok)
         
+    def get_settings(self):
+        try:
+            start = int(self.le_start.text())
+        except ValueError:
+            start = 1
         return start, self.combo_h.currentText(), self.combo_v.currentText()
 
 from PyQt6.QtWidgets import QRadioButton, QSlider, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsTextItem, QFileDialog, QButtonGroup, QGraphicsItem

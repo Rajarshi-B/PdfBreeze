@@ -236,12 +236,7 @@ class PdfBreezeMainWindow(QMainWindow):
                 self._execute_with_safety(logic_bridge.visual_reorder, file_path, save_path, seq)
 
     def action_delete_pages(self):
-
-        """
-
-                Handles delete_pages workflow passing bounds mapping logic directly.
-
-                """
+        """ Handles delete_pages workflow passing bounds mapping logic directly. """
         file_path = self._get_single_active_file()
         if not file_path: return
         from ui_elements import PDFPageViewerDialog
@@ -249,9 +244,9 @@ class PdfBreezeMainWindow(QMainWindow):
         if dlg.exec():
             indices = dlg.get_result()
             if not indices: return
-            save_dir = QFileDialog.getExistingDirectory(self, "Select Save Directory")
-            if save_dir:
-                self._execute_with_safety(logic_bridge.delete_pages, file_path, save_dir, indices)
+            save_path, _ = QFileDialog.getSaveFileName(self, "Save Trimmed PDF", "", "PDF Files (*.pdf)")
+            if save_path:
+                self._execute_with_safety(logic_bridge.delete_pages, file_path, save_path, indices)
 
     def action_rotate(self):
 

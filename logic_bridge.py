@@ -303,14 +303,17 @@ def extract_data_or_images(file_path, output_dir, mode="text"):
     else:
         _run_pdfx_worker(PDFeXpress_dependency.extract_images_worker, [file_path], output_dir, 0, 0, False, True)
 
-def delete_pages(file_path, output_dir, indices):
-    """ Deletes specific pages by index sequence 
-    Credits: Adapted from PDFeXpress - toolkit.delete_pages (string sequence)
-    """
+def delete_pages(file_path, output_path, indices):
+    """ Deletes specific pages by index sequence using pypdf directly for precise output paths. """
     _check_accessibility(file_path)
-    # Convert 0-index array into 1-based string
-    rng_str = ",".join([str(i+1) for i in indices])
-    _run_pdfx_worker(PDFeXpress_dependency.delete_pages_worker, file_path, output_dir, rng_str)
+    reader = PdfReader(file_path)
+    writer = PdfWriter()
+    delete_set = set(indices)
+    for i in range(len(reader.pages)):
+        if i not in delete_set:
+            writer.add_page(reader.pages[i])
+    with open(output_path, "wb") as f:
+        writer.write(f)
 
 def append_page_numbers(file_path, output_path, starting_num, pos_h="center", pos_v="bottom"):
     """ Automates pagination sequentially 
